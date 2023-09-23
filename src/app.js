@@ -1,36 +1,34 @@
-import SlimSelect from 'slim-select';
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
-
-const breedSelect = document.querySelector('.breed-select');
-const loader = document.querySelector('.loader');
-const error = document.querySelector('.error');
-const catInfo = document.querySelector('.cat-info');
+import { refs } from './refs.js';
+import Notiflix from 'notiflix';
 
 async function populateBreedsSelect() {
   try {
-    loader.style.display = 'block';
+    refs.loader.style.display = 'block';
     const breeds = await fetchBreeds();
 
     breeds.forEach(breed => {
       const option = document.createElement('option');
       option.value = breed.id;
       option.textContent = breed.name;
-      breedSelect.appendChild(option);
+      refs.breedSelect.appendChild(option);
     });
   } catch (err) {
-    error.style.display = 'block';
+    refs.error.style.display = 'block';
     console.error(err);
+
+    Notiflix.Notify.failure('An error occurred while loading cat breeds');
   } finally {
-    loader.style.display = 'none';
+    refs.loader.style.display = 'none';
   }
 }
 
 async function searchCat() {
-  const selectedBreedId = breedSelect.value;
+  const selectedBreedId = refs.breedSelect.value;
 
   try {
-    loader.style.display = 'block';
-    error.style.display = 'none';
+    refs.loader.style.display = 'block';
+    refs.error.style.display = 'none';
     const catData = await fetchCatByBreed(selectedBreedId);
 
     if (catData) {
@@ -45,18 +43,22 @@ async function searchCat() {
       </div>
     </div>
   `;
-      catInfo.innerHTML = catInfoTemplate;
+      refs.catInfo.innerHTML = catInfoTemplate;
     } else {
-      catInfo.innerHTML = '';
+      refs.catInfo.innerHTML = '';
+
+      Notiflix.Notify.warning('There is no data on this breed of cat');
     }
   } catch (err) {
-    error.style.display = 'block';
+    refs.error.style.display = 'block';
     console.error(err);
+
+    Notiflix.Notify.failure('An error occurred while searching for a cat');
   } finally {
-    loader.style.display = 'none';
+    refs.loader.style.display = 'none';
   }
 }
 
-breedSelect.addEventListener('change', searchCat);
+refs.breedSelect.addEventListener('change', searchCat);
 
 populateBreedsSelect();
